@@ -8,7 +8,7 @@ app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
 app.use(bodyParser.urlencoded({extended: true}));
 
-var userTasks = [];
+var userTasks = ["Write notes", "Organise paper"];
 
 app.get("/", function(req, res){
 
@@ -19,10 +19,8 @@ app.get("/", function(req, res){
         month: "long"
     }
     var day = date.toLocaleDateString("en-US", options);
-    var dayOptions ={weekday: "long"}
-    var dayOfWeek = date.toLocaleDateString("en-US", dayOptions);
-
-    res.render("list", {day: day, kindOfDay: dayOfWeek, userTasks: userTasks});
+    var year = date.getFullYear();
+    res.render("list", {day: day, year: year, userTasks: userTasks});
 
 });
 
