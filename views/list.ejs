@@ -1,11 +1,11 @@
 <%- include("header") -%>
         <div class="box">
-            <% for (let i = 0; i<userTasks.length; i++) { %>
-                <div class="item">
-                    <input type="checkbox">
-                    <p id="task"><%= userTasks[i] %></p>
-                </div>
-            <% } %>
+            <% userTasks.forEach(userTask => { %>
+                    <div class="item">
+                        <input type="checkbox">
+                        <p id="task"><%= userTask.name %></p>
+                    </div>
+            <%  }) %>
                 
             <form action="/" method="post">
                 <input type="text" name="taskInput" placeholder="Enter a task" autocomplete="off">
