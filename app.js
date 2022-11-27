@@ -5,6 +5,7 @@ const app = express();
 const date = require(__dirname + ("/public/date.js"));
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
+const _ = require("lodash");
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + "/public"));
@@ -100,10 +101,21 @@ app.post("/", function(req, res){
 
 app.post("/delete", function(req, res) {
     const checkedTaskId = req.body.checkbox;
-    Item.findByIdAndRemove(checkedTaskId, function(err) {
-        console.log(err);
-    });
-    res.redirect("/");
+    const listName = req.body.listName;
+    console.log(listName);
+    if(listName === "Today") {
+        Item.findByIdAndRemove(checkedTaskId, function(err) {
+            console.log(err);
+        });
+        res.redirect("/");
+    } else {
+        CustomList.findOneAndUpdate({name: listName}, {$pull: {tasks: {_id: checkedTaskId}}}, function(err, foundList){
+            if(!err) {
+                res.redirect("/" + listName);
+            }
+        });
+    }
+
 });
 
 app.listen(3000, function(req, res){
