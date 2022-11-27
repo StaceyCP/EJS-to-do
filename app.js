@@ -58,7 +58,7 @@ app.get("/", function(req, res){
 });
 
 app.get("/:customListName", function(req, res) {
-    const customListName = req.params.customListName;
+    const customListName = _.capitalize(req.params.customListName);
     const customList = new CustomList({
         name: customListName,
         tasks: defaultTasks
