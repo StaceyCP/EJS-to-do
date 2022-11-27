@@ -1,10 +1,12 @@
 <%- include("header") -%>
         <div class="box">
             <% userTasks.forEach(userTask => { %>
+                <form method="post" action="/delete">
                     <div class="item">
-                        <input type="checkbox">
+                        <input type="checkbox" name="checkbox" onchange="this.form.submit()" value="<%=userTask._id%>">
                         <p id="task"><%= userTask.name %></p>
                     </div>
+                </form>
             <%  }) %>
                 
             <form action="/" method="post">

@@ -16,11 +16,12 @@ const itemsSchema = {
 };
 const Item = mongoose.model("Item", itemsSchema);
 
-const workItemsSchema = {
-    name: String
+const CustomListSchema = {
+    name: String,
+    tasks: [itemsSchema]
 }
 
-const WorkItem = mongoose.model("WorkItem", workItemsSchema);
+const CustomList = mongoose.model("CustomList", CustomListSchema);
 
 const item1 = new Item({
     name: "This is today's to-do list!"
@@ -50,49 +51,60 @@ app.get("/", function(req, res){
             });
             res.redirect("/");
         } else {
-            res.render("list", {listTitle: day, year: year, userTasks: results});    
+            res.render("list", {listTitle: "Today", date: day, year: year, userTasks: results});    
         }
     });
 });
 
-app.post("/", function(req, res) {
+app.get("/:customListName", function(req, res) {
+    const customListName = req.params.customListName;
+    const customList = new CustomList({
+        name: customListName,
+        tasks: defaultTasks
+    });
+        CustomList.findOne({name: customListName}, function(err, result){
+            if (!err) {
+                if (!result) {
+                    //Create new list
+                    console.log("List does not exist");
+                    customList.save();
+                    res.redirect("/" + customListName);
+                } else {
+                    //Show existing list
+                    console.log("List already exists");
+                    res.render("list", {listTitle: result.name, date: day, year: year, userTasks: result.tasks});
+                }
+            }
+        });
+})
+
+app.post("/", function(req, res){
     const taskName = req.body.taskInput;
+    const listName = req.body.list;
+    console.log(listName);
     const task = new Item ({
         name: taskName
     });
-    const workTask = new WorkItem ({
-        name: taskName
-    })
-
-    if (req.body.list === "Work") {
-        workTask.save();
-        res.redirect("/work");
-    } else {
+    if(listName === "Today"){
         task.save();
         res.redirect("/");
+    } else {
+        CustomList.findOne({name: listName}, function(err, result){
+            result.tasks.push(task);
+            result.save();
+            res.redirect("/" + listName);
+        })
     }
+
 });
 
-app.get("/work", function(req, res) {
-    WorkItem.find({}, function(err, results){
-        if(results.length === 0) {
-            WorkItem.insertMany(defaultTasks, function(err){
-                if(err){
-                    console.log(err);
-                } else {
-                    console.log("Items added to DB successfully");
-                }
-            });
-            res.redirect("/work");
-        } else {
-            res.render("list", {listTitle: "Work", year: year, userTasks: results});  
-        }
+app.post("/delete", function(req, res) {
+    const checkedTaskId = req.body.checkbox;
+    Item.findByIdAndRemove(checkedTaskId, function(err) {
+        console.log(err);
     });
+    res.redirect("/");
 });
-
-app.get("/about", function(req, res) {
-    res.render("about", {listTitle: "About", year: year})
-})
 
 app.listen(3000, function(req, res){
     console.log("Server is running on port 3000.")
